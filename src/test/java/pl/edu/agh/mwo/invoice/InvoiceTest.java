@@ -153,4 +153,24 @@ public class InvoiceTest {
         Assert.assertThat(number1, Matchers.lessThan(number2));
     }
 
+    @Test
+    public void testPrintEmptyInvoice() {
+        String expected = "Numer faktury: " + invoice.getNumber() + "\nLiczba pozycji: 0";
+        Assert.assertEquals(expected, invoice.getPrintableInvoice());
+    }
+
+    @Test
+    public void testPrintInvoiceWithProducts() {
+        Product p1 = new TaxFreeProduct("Warzywa", new BigDecimal("10"));
+        Product p2 = new DairyProduct("Maslo", new BigDecimal("5"));
+        invoice.addProduct(p1, 2);
+        invoice.addProduct(p2);
+
+        String[] lines = invoice.getPrintableInvoice().split("\n");
+        Assert.assertEquals("Numer faktury: " + invoice.getNumber(), lines[0]);
+        Assert.assertEquals("Warzywa | 2 | 10",            lines[1]);
+        Assert.assertEquals("Maslo | 1 | 5",               lines[2]);
+        Assert.assertEquals("Liczba pozycji: 2",           lines[3]);
+    }
+
 }

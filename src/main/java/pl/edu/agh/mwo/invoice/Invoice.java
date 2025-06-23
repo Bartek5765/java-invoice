@@ -56,4 +56,25 @@ public class Invoice {
         }
         return totalGross;
     }
+
+    public String getPrintableInvoice() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Numer faktury: ").append(number)
+                .append("\n");
+        if (!products.isEmpty()) {
+            for (Map.Entry<Product, Integer> entry : products.entrySet()) {
+                Product product = entry.getKey();
+                int qty = entry.getValue();
+                sb.append(product.getName())
+                        .append(" | ")
+                        .append(qty)
+                        .append(" | ")
+                        .append(product.getPrice())
+                        .append("\n");
+            }
+        }
+        sb.append("Liczba pozycji: ").append(products.size());
+        return sb.toString();
+    }
+
 }
