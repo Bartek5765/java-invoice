@@ -173,4 +173,36 @@ public class InvoiceTest {
         Assert.assertEquals("Liczba pozycji: 2",           lines[3]);
     }
 
+    @Test
+    public void testPrintInvoiceWithDuplicateProducts() {
+        TaxFreeProduct tea = new TaxFreeProduct("Herbata", new BigDecimal("3"));
+        invoice.addProduct(tea, 2);
+        invoice.addProduct(tea, 3);
+
+        String[] lines = invoice.getPrintableInvoice().split("\n");
+        // powinien być tylko jeden wiersz dla Herbaty
+        Assert.assertEquals(1, lines.length - 2); // numer + pozycje + liczbapozycji
+        Assert.assertEquals("Herbata | 5 | 3", lines[1]);
+        Assert.assertEquals("Liczba pozycji: 1", lines[2]);
+    }
+
+    @Test
+    public void testNetTotalWithDuplicateProducts() {
+        TaxFreeProduct sugar = new TaxFreeProduct("Cukier", new BigDecimal("2"));
+        invoice.addProduct(sugar, 4);
+        invoice.addProduct(sugar, 6);
+        // cena netto 2 * (4+6) = 20
+        Assert.assertThat(invoice.getNetTotal(), Matchers.comparesEqualTo(new BigDecimal("20")));
+    }
+
+    @Test
+    public void testGrossTotalWithDuplicateProducts() {
+        DairyProduct milk = new DairyProduct("Mleko", new BigDecimal("5"));
+        // podatek 8% więc cena z podatkiem = 5.40
+        invoice.addProduct(milk, 1);
+        invoice.addProduct(milk, 1);
+        // 2 * 5.40 = 10.80
+        Assert.assertThat(invoice.getGrossTotal(), Matchers.comparesEqualTo(new BigDecimal("10.80")));
+    }
+
 }

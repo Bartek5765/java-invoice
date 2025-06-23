@@ -1,7 +1,7 @@
 package pl.edu.agh.mwo.invoice;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import pl.edu.agh.mwo.invoice.product.Product;
@@ -13,7 +13,7 @@ public class Invoice {
     // numer faktury
     private final int number;
 
-    private Map<Product, Integer> products = new HashMap<Product, Integer>();
+    private Map<Product, Integer> products = new LinkedHashMap<>();
 
     // inicjalizacja numeru
     public Invoice() {
@@ -32,14 +32,15 @@ public class Invoice {
         if (product == null || quantity <= 0) {
             throw new IllegalArgumentException();
         }
-        products.put(product, quantity);
+        int existing = products.getOrDefault(product, 0);
+        products.put(product, existing + quantity);
     }
 
     public BigDecimal getNetTotal() {
         BigDecimal totalNet = BigDecimal.ZERO;
-        for (Product product : products.keySet()) {
-            BigDecimal quantity = new BigDecimal(products.get(product));
-            totalNet = totalNet.add(product.getPrice().multiply(quantity));
+        for (Map.Entry<Product, Integer> entry : products.entrySet()) {
+            BigDecimal qty = new BigDecimal(entry.getValue());
+            totalNet = totalNet.add(entry.getKey().getPrice().multiply(qty));
         }
         return totalNet;
     }
@@ -50,28 +51,21 @@ public class Invoice {
 
     public BigDecimal getGrossTotal() {
         BigDecimal totalGross = BigDecimal.ZERO;
-        for (Product product : products.keySet()) {
-            BigDecimal quantity = new BigDecimal(products.get(product));
-            totalGross = totalGross.add(product.getPriceWithTax().multiply(quantity));
+        for (Map.Entry<Product, Integer> entry : products.entrySet()) {
+            BigDecimal qty = new BigDecimal(entry.getValue());
+            totalGross = totalGross.add(entry.getKey().getPriceWithTax().multiply(qty));
         }
         return totalGross;
     }
 
     public String getPrintableInvoice() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Numer faktury: ").append(number)
-                .append("\n");
-        if (!products.isEmpty()) {
-            for (Map.Entry<Product, Integer> entry : products.entrySet()) {
-                Product product = entry.getKey();
-                int qty = entry.getValue();
-                sb.append(product.getName())
-                        .append(" | ")
-                        .append(qty)
-                        .append(" | ")
-                        .append(product.getPrice())
-                        .append("\n");
-            }
+        sb.append("Numer faktury: ").append(number).append("\n");
+        for (Map.Entry<Product, Integer> entry : products.entrySet()) {
+            sb.append(entry.getKey().getName())
+                    .append(" | ").append(entry.getValue())
+                    .append(" | ").append(entry.getKey().getPrice())
+                    .append("\n");
         }
         sb.append("Liczba pozycji: ").append(products.size());
         return sb.toString();
