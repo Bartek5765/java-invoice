@@ -125,4 +125,32 @@ public class InvoiceTest {
     public void testAddingNullProduct() {
         invoice.addProduct(null);
     }
+
+    @Test
+    public void testInvoiceHasPositiveNumber() {
+        // nowa faktura powinna mieć numer > 0
+        Assert.assertTrue(invoice.getNumber() > 0);
+    }
+    @Test
+    public void testTwoInvoicesHaveDifferentNumbers() {
+        // nowa fatura powinna mieć różne numery
+        int number1 = new Invoice().getNumber();
+        int number2 = new Invoice().getNumber();
+        Assert.assertNotEquals(number1, number2);
+    }
+
+    @Test
+    public void testInvoiceDoesNotChangeItsNumber() {
+        // numer faktury nie zmienia się
+        Assert.assertEquals(invoice.getNumber(), invoice.getNumber());
+    }
+
+    @Test
+    public void testTheFirstInvoiceNumberIsLowerThanTheSecond() {
+        // porządek numeracji
+        int number1 = new Invoice().getNumber();
+        int number2 = new Invoice().getNumber();
+        Assert.assertThat(number1, Matchers.lessThan(number2));
+    }
+
 }

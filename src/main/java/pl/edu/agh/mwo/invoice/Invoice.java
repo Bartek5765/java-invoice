@@ -7,7 +7,22 @@ import java.util.Map;
 import pl.edu.agh.mwo.invoice.product.Product;
 
 public class Invoice {
+    // licznik numerów faktur
+    private static int invoiceCounter = 0;
+
+    // numer faktury
+    private final int number;
+
     private Map<Product, Integer> products = new HashMap<Product, Integer>();
+
+    // inicjalizacja numeru
+    public Invoice() {
+        this.number = ++invoiceCounter;
+    }
+
+    public int getNumber() {
+        return number;
+    }
 
     public void addProduct(Product product) {
         addProduct(product, 1);
