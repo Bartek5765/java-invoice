@@ -61,10 +61,10 @@ public class Invoice {
     public String getPrintableInvoice() {
         StringBuilder sb = new StringBuilder();
         sb.append("Numer faktury: ").append(number).append("\n");
-        for (Map.Entry<Product, Integer> entry : products.entrySet()) {
-            sb.append(entry.getKey().getName())
-                    .append(" | ").append(entry.getValue())
-                    .append(" | ").append(entry.getKey().getPrice())
+        for (Map.Entry<Product, Integer> e : products.entrySet()) {
+            sb.append(e.getKey().getName())
+                    .append(" | ").append(e.getValue())
+                    .append(" | ").append(e.getKey().getPrice())
                     .append("\n");
         }
         sb.append("Liczba pozycji: ").append(products.size());

@@ -8,10 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import pl.edu.agh.mwo.invoice.Invoice;
-import pl.edu.agh.mwo.invoice.product.DairyProduct;
-import pl.edu.agh.mwo.invoice.product.OtherProduct;
-import pl.edu.agh.mwo.invoice.product.Product;
-import pl.edu.agh.mwo.invoice.product.TaxFreeProduct;
+import pl.edu.agh.mwo.invoice.product.*;
 
 public class InvoiceTest {
     private Invoice invoice;
@@ -203,6 +200,24 @@ public class InvoiceTest {
         invoice.addProduct(milk, 1);
         // 2 * 5.40 = 10.80
         Assert.assertThat(invoice.getGrossTotal(), Matchers.comparesEqualTo(new BigDecimal("10.80")));
+    }
+
+    @Test
+    public void testInvoiceTotalsWithWineExcise() {
+        // 2 butelki wina po 10 zł netto: 2×(10+23%) + 2×5.56 = 2×12.30 + 11.12 = 24.60 + 11.12 = 35.72
+        invoice.addProduct(new BottleOfWine("Wino", new BigDecimal("10.00")), 2);
+        Assert.assertThat(invoice.getNetTotal(),    Matchers.comparesEqualTo(new BigDecimal("20.00")));
+        Assert.assertThat(invoice.getGrossTotal(),  Matchers.comparesEqualTo(new BigDecimal("35.72")));
+        Assert.assertThat(invoice.getTaxTotal(),    Matchers.comparesEqualTo(new BigDecimal("15.72")));
+    }
+
+    @Test
+    public void testInvoiceTotalsWithFuelExciseOnly() {
+        // 3 kanistry paliwa po 4 zł netto: 3×(4 + 5.56) = 3×9.56 = 28.68
+        invoice.addProduct(new FuelCanister("ON", new BigDecimal("4.00")), 3);
+        Assert.assertThat(invoice.getNetTotal(),    Matchers.comparesEqualTo(new BigDecimal("12.00")));
+        Assert.assertThat(invoice.getGrossTotal(),  Matchers.comparesEqualTo(new BigDecimal("28.68")));
+        Assert.assertThat(invoice.getTaxTotal(),    Matchers.comparesEqualTo(new BigDecimal("16.68")));
     }
 
 }
