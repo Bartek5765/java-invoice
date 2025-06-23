@@ -1,52 +1,74 @@
 package pl.edu.agh.mwo.invoice;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import pl.edu.agh.mwo.invoice.product.Product;
 
 public class Invoice {
-    // private Collection<Product> products = new ArrayList<>();
+    // licznik numerów faktur
+    private static int invoiceCounter = 0;
 
-    private final Map<Product, Integer> products = new HashMap<>();
+    // numer faktury
+    private final int number;
+
+    private Map<Product, Integer> products = new LinkedHashMap<>();
+
+    // inicjalizacja numeru
+    public Invoice() {
+        this.number = ++invoiceCounter;
+    }
+
+    public int getNumber() {
+        return number;
+    }
 
     public void addProduct(Product product) {
         addProduct(product, 1);
-
     }
 
     public void addProduct(Product product, Integer quantity) {
-        if (product == null) {
-            throw new IllegalArgumentException("Quantity cannot be negative");
+        if (product == null || quantity <= 0) {
+            throw new IllegalArgumentException();
         }
-        if (quantity <= 0) {
-            throw new IllegalArgumentException("Quantity must be positive");
-        }
-        products.merge(product, quantity, Integer::sum);
+        int existing = products.getOrDefault(product, 0);
+        products.put(product, existing + quantity);
     }
 
-    public BigDecimal getSubtotal() {
-        BigDecimal subtotal = BigDecimal.ZERO;
+    public BigDecimal getNetTotal() {
+        BigDecimal totalNet = BigDecimal.ZERO;
         for (Map.Entry<Product, Integer> entry : products.entrySet()) {
-            BigDecimal priceNet = entry.getKey().getPrice();
-            int quantity = entry.getValue();
-            subtotal = subtotal.add(priceNet.multiply(BigDecimal.valueOf(quantity)));
+            BigDecimal qty = new BigDecimal(entry.getValue());
+            totalNet = totalNet.add(entry.getKey().getPrice().multiply(qty));
         }
-        return subtotal;
+        return totalNet;
     }
 
-    public BigDecimal getTax() {
-        BigDecimal totalTax = BigDecimal.ZERO;
+    public BigDecimal getTaxTotal() {
+        return getGrossTotal().subtract(getNetTotal());
+    }
+
+    public BigDecimal getGrossTotal() {
+        BigDecimal totalGross = BigDecimal.ZERO;
         for (Map.Entry<Product, Integer> entry : products.entrySet()) {
-            BigDecimal taxPerOne = entry.getKey().getPriceWithTax().subtract(entry.getKey().getPrice());
-            int quantity = entry.getValue();
-            totalTax = totalTax.add(taxPerOne.multiply(BigDecimal.valueOf(quantity)));
+            BigDecimal qty = new BigDecimal(entry.getValue());
+            totalGross = totalGross.add(entry.getKey().getPriceWithTax().multiply(qty));
         }
-        return totalTax;
+        return totalGross;
     }
 
-    public BigDecimal getTotal() {
-        return getSubtotal().add(getTax());
+    public String getPrintableInvoice() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Numer faktury: ").append(number).append("\n");
+        for (Map.Entry<Product, Integer> e : products.entrySet()) {
+            sb.append(e.getKey().getName())
+                    .append(" | ").append(e.getValue())
+                    .append(" | ").append(e.getKey().getPrice())
+                    .append("\n");
+        }
+        sb.append("Liczba pozycji: ").append(products.size());
+        return sb.toString();
     }
+
 }

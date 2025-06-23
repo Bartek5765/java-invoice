@@ -54,4 +54,18 @@ public class ProductTest {
     public void testProductWithNegativePrice() {
         new TaxFreeProduct("Mandarynki", new BigDecimal("-1.00"));
     }
+
+    @Test
+    public void testPriceWithExciseOnWine() {
+        Product wine = new BottleOfWine("Wino Wytrawne", new BigDecimal("10.00"));
+        // 10 + 23% VAT = 12.30, plus akcyza 5.56 = 17.86
+        Assert.assertThat(wine.getPriceWithTax(), Matchers.comparesEqualTo(new BigDecimal("17.86")));
+    }
+
+    @Test
+    public void testPriceWithExciseOnFuelAndNoVat() {
+        Product fuel = new FuelCanister("ON", new BigDecimal("4.00"));
+        // 4.00 + akcyza 5.56 = 9.56 (VAT zniesiony)
+        Assert.assertThat(fuel.getPriceWithTax(), Matchers.comparesEqualTo(new BigDecimal("9.56")));
+    }
 }
